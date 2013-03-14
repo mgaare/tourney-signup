@@ -95,6 +95,16 @@ Class User extends Model {
 		return (count($res) > 0);
 	}
 	
+	public function loginUser($user) {
+		$_SESSION['player_logged_in'] = true;
+		$_SESSION['player'] = $user;
+	}
+	
+	public function isLoggedIn() {
+		return (isset($_SESSION['player_logged_in']) 
+			&& $_SESSION['player_logged_in']);
+	}
+	
 }
 
 
