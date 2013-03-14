@@ -80,7 +80,7 @@ Class User extends Model {
 
 	protected $table = 'accounts';
 	
-	function checkLogin($username, $password) {
+	public function checkLogin($username, $password) {
 		$qs = $this->qs_base . ' where nick = ? and password = PASSWORD(?)'; 
 		$result = $this->query($qs, array($username, $password));
 		if (count($result) == 0) {
@@ -89,7 +89,7 @@ Class User extends Model {
 		else { return $result; }
 	}
 	
-	function userExists($username) {
+	public function userExists($username) {
 		$qs = $this->qs_base . ' where nick = ?';
 		$res = $this->query($qs, array($username));
 		return (count($res) > 0);
@@ -102,6 +102,9 @@ Class Event extends Model {
 	
 	protected $table = 'events';
 	
-	
+	public function getCurrent() {
+		$qs = $this->qs_base . ' where time > ' . time() . ' order by time ASC limit 1';
+		return $this->query($qs);
+	}
 	
 }
