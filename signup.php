@@ -4,16 +4,16 @@ require_once('./lib/base.php');
 
 function log_in() {
 	// show login form, or check if there's a POST
-	if (isset($_POST['user']) && isset($_POST['password'])) {
-		check_login();
+	if (isset($_POST['username']) && isset($_POST['password'])) {
+		check_login($_POST['username'], $_POST['password']);
 	} else {
 		log_in_form();
 	}
 }
 
-function check_login() {
+function check_login($username, $password) {
 	$user = new User();
-	if ($login = $user->checkLogin($_POST['user'], $_POST['password'])) {
+	if ($login = $user->checkLogin($username, $password)) {
 		$user->loginUser($login);
 		sign_up_form();	
 	} else {
