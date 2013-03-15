@@ -87,15 +87,16 @@ Class Model extends DbQuery {
 		// takes the array of columns and turns it into:
 		// col1 = ?, col2 = ?, ... etc
 		$sets = implode(', ', 
-						array_map(create_function('val', 'return $val . " = ?";'), 
-								array_keys($params)));
+						array_map(function($val) { return $val . " = ?"; }), 
+								  array_keys($params));
 		$where = ' where ' . $this->id_col . ' = ?';
 		$qs = $qs . $sets . $where;
 		// now we need the id back at the end of the params list
 		// at this point you might be thinking, why not just use named params
 		// in the statement?
 		// shut up.
-		return $this->query($qs, array_merge(array_values($params), array($this->id_col => $id)));
+		return $this->query($qs, array_merge(array_values($params), 
+											 array($this->id_col => $id)));
 	}
 	
 	protected function _create($record) {
@@ -109,8 +110,8 @@ Class Model extends DbQuery {
 		$values = 'values(' 
 			. implode(', ', 
 				array_map(
-					create_function('_', 'return "?";')),
-					array_values($record)) 
+					function() {return "?"; },
+					array_values($record)))
 			. ')';
 		$qs = $qs . $fields . $values;
 		return $this->query($qs, array_values($record));
@@ -182,7 +183,41 @@ Class Signup extends Model {
 			$this->_update($signup); 
 		} else { $this->_create($signup); }
 	}
+}
 
+class Mode extends Model {
+
+	protected $table = 'modes';
+	private $select_event_modes = 'select * from modes 
+		inner join event_modes on event_modes.mode_id = modes.id 
+		inner join events on events.id = event_modes.event_id 
+		where events.id = ?';
+
+	public function getForEvent($event) {
+		$res = $this->query($this->select_event_modes, array($event['id']));
+	}
 	
+	public function saveAllForEvent($event, $modes) {
+		$this->deleteForEvent($event);
+		// it's a closure
+		$results = array_map(function($mode) use ($event) { return $this->saveForEvent($event, $mode); }, $modes);
+		return (in_array(false, $results));
+	}
+
+	public function saveForEvent($event, $mode) {
+		$qs = 'insert into event_modes (event_id, mode_id) values (?, ?)';
+		return $this->query($qs, array($event['id'], $mode['id']));
+	}
 	
+	public function deleteForEvent($event) {
+		$qs = 'delete from event_modes where event_id = ?';
+		return $this->query($qs, array($event['id']));
+	}
+	
+	public function isEventMode($event, $mode) {
+		$cond = ' and modes.id = ?';
+		$res = $this->query($this->select_event_modes . $cond, array($event['id'], $mode['id']));
+		return !(empty($res));
+	}
+
 }
