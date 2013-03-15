@@ -28,21 +28,31 @@ Class DbQuery {
 	
 	/**
 	 * handy little query abstraction so I don't have to type all this
-	 * boilerplate every time. $params is for query params, an array in
-	 * the same order as the ?'s in the statement
+	 * boilerplate every time. $params is for query params, needs to
+	 * have keys that match the query string placeholders, in the form of
+	 * ':key'
 	 */
 	public function query($query_string, $params = false) {
 		$dbcon = $this->getInstance();
+		$statement = $this->_prepareQuery($dbcon, $query_string, $params);
+		return $this->executeQuery($statement);
+	}
+	
+	protected function _prepareQuery($dbh, $query_string, $params) {
 		$statement = $dbcon->prepare($query_string);
 		if ($params) {
-			// just to make sure this is a numeric-indexed array with keys starting at 0
-			$params = array_values($params);
-			// bindValue wants things to start at 1 and needs vars passed by reference
-			foreach ($params as $index => &$value) {
-				$statement->bindValue($index + 1, $value);
+			if (!$this->_bindParams($statement, $params)) {
+				error_log('call to DbQuery::_bindParams failed with args ' . print_r($params, true));
+				return false;
 			}
 		}
-		return $this->executeQuery($statement);
+		return $statement;
+	}
+	
+	protected function _bindParams($statement, $params) {
+		return array_walk($params, function($val, $key) use($statement){
+			$statement->bindValue(':' . $key, $val);			
+		});
 	}
 	
 	public function executeQuery($statement) {
@@ -74,47 +84,37 @@ Class Model extends DbQuery {
 	}
 	
 	public function findById($id) {
-		$qs = $this->select_base . ' where ' . $id_col . ' = ?';
-		return $this->query($qs, array($id));
+		$qs = $this->select_base . ' where ' . $this->id_col . ' = :' . $this->id_col;
+		return $this->query($qs, array($this->id_col => $id));
 	}
 	
-	protected function _update($record) {
+	protected function _buildUpdateQuery($record) {
 		$qs = $this->update_base;
-		$id = $record[$this->id_col];
+		$id = array($this->id_col => $record[$this->id_col]);
 		// filter out the id because it's handled separately
 		$params = array_diff_key($record, array($this->id_col => 1));
 		// can't help myself... going a little functional here
 		// takes the array of columns and turns it into:
-		// col1 = ?, col2 = ?, ... etc
+		// col1 = :col1, col2 = :col2, ... etc
 		$sets = implode(', ', 
-						array_map(function($val) { return $val . " = ?"; }), 
+						array_map(function($val) { return $val . " = :" . $val; }), 
 								  array_keys($params));
-		$where = ' where ' . $this->id_col . ' = ?';
-		$qs = $qs . $sets . $where;
-		// now we need the id back at the end of the params list
-		// at this point you might be thinking, why not just use named params
-		// in the statement?
-		// shut up.
-		return $this->query($qs, array_merge(array_values($params), 
-											 array($this->id_col => $id)));
+		$where = ' where ' . $this->id_col . ' = :' . $this->id_col;
+		return $qs . $sets . $where;
 	}
 	
-	protected function _create($record) {
+	protected function _buildCreateQuery($record) {
 		$qs = $this->create_base;
 		// more functional style... it's addictive really
 		$fields = '(' . implode(', ', array_keys($record)) . ') ';
-		// does it seem overkill to use a map with an anonymous function just
-		// to create a string with the correct number of ?'s? A weaker man
-		// might say yes. Readability would be better if eclipse new how to
-		// tab properly.
+		// and the corresponding values placeholders part
 		$values = 'values(' 
 			. implode(', ', 
 				array_map(
-					function() {return "?"; },
-					array_values($record)))
+					function($key) {return ":" . $key; },
+					array_keys($record)))
 			. ')';
-		$qs = $qs . $fields . $values;
-		return $this->query($qs, array_values($record));
+		return $qs . $fields . $values;
 	}
 }
 
@@ -124,8 +124,8 @@ Class User extends Model {
 	protected $table = 'accounts';
 	
 	public function checkLogin($username, $password) {
-		$qs = $this->select_base . ' where nick = ? and password = PASSWORD(?)'; 
-		$result = $this->query($qs, array($username, $password));
+		$qs = $this->select_base . ' where nick = :nick and password = PASSWORD(:password)'; 
+		$result = $this->query($qs, array('nick' => $username, 'password' => $password));
 		if (count($result) == 0) {
 			return false;
 		}
@@ -133,8 +133,8 @@ Class User extends Model {
 	}
 	
 	public function exists($username) {
-		$qs = $this->select_base . ' where nick = ?';
-		$res = $this->query($qs, array($username));
+		$qs = $this->select_base . ' where nick = :nick';
+		$res = $this->query($qs, array('nick' => $username));
 		return (count($res) > 0);
 	}
 	
@@ -164,10 +164,18 @@ Class Event extends Model {
 Class Signup extends Model {
 	
 	protected $table = 'signups';
+	protected $user;
+	protected $event; 
+	
+	function __construct() {
+		parent::__construct();
+		$this->user = new User();
+		$this->event = new Event();
+	}
 	
 	public function getCurrentForUser($user, $event) {
-		$qs = $this->select_base . ' where user_id = ? AND event_id = ?';
-		$res = $this->query($qs, array($user['id'], $event['id']));
+		$qs = $this->select_base . ' where user_id = :user_id AND event_id = :event_id';
+		$res = $this->query($qs, array('user_id' => $user['id'], 'event_id' => $event['id']));
 		if (count($res) < 1) {
 			return false;
 		} else {
