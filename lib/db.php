@@ -56,12 +56,16 @@ Class DbQuery {
 Class Model extends DbQuery {
 
 	protected $table = null;
-	protected $qs_base = '';
+	protected $select_base = '';
+	protected $insert_base = '';
+	protected $update_base = '';
 	protected $id_col = 'id';
 	
 	function __construct() {
 		if ($this->table) {
-			$this->qs_base = 'select * from ' . $this->table;
+			$this->select_base = 'select * from ' . $this->table;
+			$this->insert_base = 'insert into ' . $this->table;
+			$this->update_base = 'update ' . $this->table . ' set ';
 		}
 	}
 
@@ -70,8 +74,46 @@ Class Model extends DbQuery {
 	}
 	
 	public function findById($id) {
-		$qs = $this->qs_base . ' where ' . $id_col . ' = ?';
+		$qs = $this->select_base . ' where ' . $id_col . ' = ?';
 		return $this->query($qs, array($id));
+	}
+	
+	protected function _update($record) {
+		$qs = $this->update_base;
+		$id = $record[$this->id_col];
+		// filter out the id because it's handled separately
+		$params = array_diff_key($record, array($this->id_col => 1));
+		// can't help myself... going a little functional here
+		// takes the array of columns and turns it into:
+		// col1 = ?, col2 = ?, ... etc
+		$sets = implode(', ', 
+						array_map(create_function('val', 'return $val . " = ?";'), 
+								array_keys($params)));
+		$where = ' where ' . $this->id_col . ' = ?';
+		$qs = $qs . $sets . $where;
+		// now we need the id back at the end of the params list
+		// at this point you might be thinking, why not just use named params
+		// in the statement?
+		// shut up.
+		return $this->query($qs, array_merge(array_values($params), array($this->id_col => $id)));
+	}
+	
+	protected function _create($record) {
+		$qs = $this->create_base;
+		// more functional style... it's addictive really
+		$fields = '(' . implode(', ', array_keys($record)) . ') ';
+		// does it seem overkill to use a map with an anonymous function just
+		// to create a string with the correct number of ?'s? A weaker man
+		// might say yes. Readability would be better if eclipse new how to
+		// tab properly.
+		$values = 'values(' 
+			. implode(', ', 
+				array_map(
+					create_function('_', 'return "?";')),
+					array_values($record)) 
+			. ')';
+		$qs = $qs . $fields . $values;
+		return $this->query($qs, array_values($record));
 	}
 }
 
@@ -81,7 +123,7 @@ Class User extends Model {
 	protected $table = 'accounts';
 	
 	public function checkLogin($username, $password) {
-		$qs = $this->qs_base . ' where nick = ? and password = PASSWORD(?)'; 
+		$qs = $this->select_base . ' where nick = ? and password = PASSWORD(?)'; 
 		$result = $this->query($qs, array($username, $password));
 		if (count($result) == 0) {
 			return false;
@@ -89,8 +131,8 @@ Class User extends Model {
 		else { return $result; }
 	}
 	
-	public function userExists($username) {
-		$qs = $this->qs_base . ' where nick = ?';
+	public function exists($username) {
+		$qs = $this->select_base . ' where nick = ?';
 		$res = $this->query($qs, array($username));
 		return (count($res) > 0);
 	}
@@ -104,7 +146,6 @@ Class User extends Model {
 		return (isset($_SESSION['player_logged_in']) 
 			&& $_SESSION['player_logged_in']);
 	}
-	
 }
 
 
@@ -113,8 +154,35 @@ Class Event extends Model {
 	protected $table = 'events';
 	
 	public function getCurrent() {
-		$qs = $this->qs_base . ' where time > ' . time() . ' order by time ASC limit 1';
+		$qs = $this->select_base . ' where time > ' . time() . ' order by time ASC limit 1';
 		return $this->query($qs);
 	}
+}
+
+
+Class Signup extends Model {
+	
+	protected $table = 'signups';
+	
+	public function getCurrentForUser($user, $event) {
+		$qs = $this->select_base . ' where user_id = ? AND event_id = ?';
+		$res = $this->query($qs, array($user['id'], $event['id']));
+		if (count($res) < 1) {
+			return false;
+		} else {
+			return $res;
+		}
+	}
+	
+	public function save($signup) {
+		$user = array('id' => $signup['user_id']);
+		$event = array('id' => $signup['event_id']);
+		if ($current = $this->getCurrentForUser($user, $event)) {
+			$signup['id'] = $current['id'];
+			$this->_update($signup); 
+		} else { $this->_create($signup); }
+	}
+
+	
 	
 }
