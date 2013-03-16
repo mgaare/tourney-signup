@@ -12,7 +12,7 @@ function log_in() {
 }
 
 function check_login($username, $password) {
-	$user = new User();
+	$user = ModelStore::getInstance('User');
 	if ($login = $user->checkLogin($username, $password)) {
 		$user->loginUser($login);
 		sign_up_form();	
@@ -48,7 +48,7 @@ EOT;
 }
 
 function log_in_error($username, $password) {
-	$user = new User();
+	$user = ModelStore::getInstance('User');
 	if ($user->exists($username)) {
 		$message = 'Invalid Password. Need a password reset? <a href="http://swl.me/index.php/contact-us">Contact Us.</a>'; 	
 	} else {

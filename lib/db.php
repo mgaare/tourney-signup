@@ -72,11 +72,18 @@ Class Model extends DbQuery {
 	protected $id_col = 'id';
 	
 	function __construct() {
+		// I'm not sure if this is going to work... if we get some strange
+		// model initialization problems, this is a possible culprit
+		// not sure if it even helps
+		if (ModelStore::isInstance(get_class($this))) {
+			return ModelStore::getInstance(get_class($this));
+		} 
 		if ($this->table) {
 			$this->select_base = 'select * from ' . $this->table;
 			$this->insert_base = 'insert into ' . $this->table;
 			$this->update_base = 'update ' . $this->table . ' set ';
 		}
+		ModelStore::addInstance($this);
 	}
 
 	public function getTable() {
@@ -140,11 +147,20 @@ Class ModelStore {
 
 	private static $models = array();
 	
-	public static function getInstance($model) {
-		if (isset($this->models[$model])) {
-			return $this->models[$model];
+	public static function addInstance($model) {
+		$this->models[get_class($model)] = $model;
+	}
+	
+	public static function isInstance($model_class) {
+		return (isset($this->models[$model_class]));
+	}
+	
+	public static function getInstance($model_class) {
+		if (ModelStore::isInstance($model_class)) {
+			return $this->models[$model_class];
 		} else {
-			return $this->models[$model] = new $model();
+			$this->models[$model_class] = true;
+			return $this->models[$model_class] = new $model_class();
 		}		
 	}	
 }
