@@ -88,8 +88,17 @@ Class Model extends DbQuery {
 		return $this->query($qs, array($this->id_col => $id));
 	}
 	
-	protected function _buildUpdateQuery($record) {
-		$qs = $this->update_base;
+	public function update($record) {
+		$qs = $this->_buildUpdateQuery($record);
+		return $this->query($qs, $record);
+	}
+	
+	protected function _buildUpdateQuery($record, $qs_base = false) {
+		if ($qs_base) {
+			$qs = $qs_base;
+		} else {
+			$qs = $this->update_base;
+		}
 		$id = array($this->id_col => $record[$this->id_col]);
 		// filter out the id because it's handled separately
 		$params = array_diff_key($record, array($this->id_col => 1));
@@ -103,10 +112,19 @@ Class Model extends DbQuery {
 		return $qs . $sets . $where;
 	}
 	
-	protected function _buildCreateQuery($record) {
-		$qs = $this->create_base;
+	public function create($record) {
+		$qs = $this->_buildCreateQuery($record);
+		return $this->query($qs, $record);
+	}
+	
+	protected function _buildCreateQuery($record, $qs_base = false) {
+		if ($qs_base) {
+			$qs = $qs_base;
+		} else {
+			$qs = $this->create_base;
+		}
 		// more functional style... it's addictive really
-		$fields = '(' . implode(', ', array_keys($record)) . ') ';
+		$fields = ' (' . implode(', ', array_keys($record)) . ') ';
 		// and the corresponding values placeholders part
 		$values = 'values(' 
 			. implode(', ', 
@@ -116,6 +134,19 @@ Class Model extends DbQuery {
 			. ')';
 		return $qs . $fields . $values;
 	}
+}
+
+Class ModelStore {
+
+	private static $models = array();
+	
+	public static function getInstance($model) {
+		if (isset($this->models[$model])) {
+			return $this->models[$model];
+		} else {
+			return $this->models[$model] = new $model();
+		}		
+	}	
 }
 
 
@@ -155,7 +186,8 @@ Class Event extends Model {
 	protected $table = 'events';
 	
 	public function getCurrent() {
-		$qs = $this->select_base . ' where time > ' . time() . ' order by time ASC limit 1';
+		$qs = $this->select_base . ' where time > ' . time() 
+			. ' order by time ASC limit 1';
 		return $this->query($qs);
 	}
 }
@@ -169,13 +201,16 @@ Class Signup extends Model {
 	
 	function __construct() {
 		parent::__construct();
-		$this->user = new User();
-		$this->event = new Event();
+		$this->user = ModelStore::getInstance('User');
+		$this->event = ModelStore::getInstance('Event');
 	}
 	
 	public function getCurrentForUser($user, $event) {
-		$qs = $this->select_base . ' where user_id = :user_id AND event_id = :event_id';
-		$res = $this->query($qs, array('user_id' => $user['id'], 'event_id' => $event['id']));
+		$qs = $this->select_base . ' where user_id = :user_id '
+			. 'AND event_id = :event_id';
+		$res = $this->query($qs, 
+			array('user_id' => $user[$this->user->id_col],
+				'event_id' => $event[$this->event->id_col]));
 		if (count($res) < 1) {
 			return false;
 		} else {
@@ -184,42 +219,54 @@ Class Signup extends Model {
 	}
 	
 	public function save($signup) {
-		$user = array('id' => $signup['user_id']);
-		$event = array('id' => $signup['event_id']);
+		$user = array($this->user->id_col => $signup['user_id']);
+		$event = array($this->user->id_col => $signup['event_id']);
 		if ($current = $this->getCurrentForUser($user, $event)) {
-			$signup['id'] = $current['id'];
-			$this->_update($signup); 
-		} else { $this->_create($signup); }
+			$signup[$this->id_col] = $current[$this->id_col];
+			$this->update($signup); 
+		} else { $this->create($signup); }
 	}
 }
 
 class Mode extends Model {
-
+	
 	protected $table = 'modes';
+	public $event;
 	private $select_event_modes = 'select * from modes 
 		inner join event_modes on event_modes.mode_id = modes.id 
 		inner join events on events.id = event_modes.event_id 
 		where events.id = ?';
 
+	function __construct() {
+		parent::__construct();
+		$this->event = ModelStore::getInstance('Event');
+	}
+
 	public function getForEvent($event) {
-		$res = $this->query($this->select_event_modes, array($event['id']));
+		$res = $this->query($this->select_event_modes, 
+							array($this->id_col => $event['id']));
 	}
 	
 	public function saveAllForEvent($event, $modes) {
 		$this->deleteForEvent($event);
 		// it's a closure
-		$results = array_map(function($mode) use ($event) { return $this->saveForEvent($event, $mode); }, $modes);
+		$results = array_map(
+			function($mode) use ($event) {
+				 return $this->saveForEvent($event, $mode); },
+			$modes);
 		return (in_array(false, $results));
 	}
 
 	public function saveForEvent($event, $mode) {
-		$qs = 'insert into event_modes (event_id, mode_id) values (?, ?)';
-		return $this->query($qs, array($event['id'], $mode['id']));
+		$qs = 'insert into event_modes (event_id, mode_id) ' 
+			. 'values (:event_id, :mode_id)';
+		return $this->query($qs, 
+			array($event[$this->event->id_col], $mode[$this->id_col]));
 	}
 	
 	public function deleteForEvent($event) {
-		$qs = 'delete from event_modes where event_id = ?';
-		return $this->query($qs, array($event['id']));
+		$qs = 'delete from event_modes where event_id = :event_id';
+		return $this->query($qs, array('event_id' => $event[$this->event->id_col]));
 	}
 	
 	public function isEventMode($event, $mode) {
@@ -229,3 +276,59 @@ class Mode extends Model {
 	}
 
 }
+
+class Map extends Model {
+
+	public $mode;
+	protected $table = 'maps';
+	
+	function __construct() {
+		parent::__construct();
+		$this->mode = ModelStore::getInstance('Mode');		
+	}
+	
+	public function getForMode($mode) {
+		$qs = $this->select_base . ' inner join mode_maps on mode_maps.map_id = maps.' 
+			. $this->id_col . ' where mode_maps.mode_id = :mode_id';
+		$params = array('mode_id' => $mode[$this->mode->id_col]);
+		return $this->query($qs, $params);
+	}
+	
+	public function saveForMode($map, $mode) {
+		$qs_base = 'insert into mode_maps ';
+		$params = array('mode_id' => $mode[$this->mode->id_col],
+						'map_id' => $map[$this->id_col]);
+		return $this->create($params);
+	}
+	
+	public function saveAllForMode($maps, $mode) {
+		$this->deleteForMode($mode);
+		// it's a closure
+		$results = array_map(
+			function($map) use ($mode) {
+				 return $this->saveForMode($map, $mode); },
+			$modes);
+		return (in_array(false, $results));
+	}
+	
+	public function deleteForMode($mode) {
+		$qs = 'delete from mode_maps where mode_id = :mode_id';
+		return $this->query($qs, array('mode_id' => $mode[$this->mode->id_col]));
+	}
+}
+
+class Vote extends Model {
+	
+	protected $table = 'votes';
+	private $event;
+	private $mode;
+	private $map;
+	
+	function __construct() {
+		parent::construct();
+		$this->event = ModelStore::getInstance('Event');
+		$this->mode = ModelStore::getInstance('Mode');
+		$this->map = ModelStore::getInstance('Map');
+	}
+}
+	
