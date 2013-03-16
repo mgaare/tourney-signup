@@ -3,6 +3,13 @@ include_protection(__FILE__);
 ?>
 <h1>Sign up for the next SWL Tournament</h1>
 
+<?php
+
+if (empty($event)) {
+	echo "<h2>Signups are not yet active for the next SWL event</h2>";
+} else {
+?>
+
 <p>Taking place <?php echo date("F j, G:i", $event['time']); ?></p>
 
 <form method="post">
@@ -65,3 +72,4 @@ echo mapcat($snippet, $modes);
 ?>
 <input type="Submit" value="Sign Up">
 </form>
+<?php } ?>
