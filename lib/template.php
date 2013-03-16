@@ -9,6 +9,11 @@ class Template {
 	}
 	
 	public function render($content) {
+		// if we are including any files here, they can check for the
+		// include_protection variable to make sure they're not being
+		// hit directly from a browser... in other words a kind of stupid hack
+		// to let us put our template files inside the webroot			
+		$include_protection = true;
 		ob_start();
 		require $this->layout;
 		return ob_get_clean();
@@ -43,6 +48,11 @@ class TemplateSnippet {
 		foreach ($params as $key => $value) {
 			$$key = $value;
 		}
+		// if we are including any files here, they can check for the
+		// include_protection variable to make sure they're not being
+		// hit directly from a browser... in other words a kind of stupid hack
+		// to let us put our template files inside the webroot
+		$include_protection = true;
 		// now render and return it
 		ob_start();
 		require $this->template;
