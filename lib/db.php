@@ -59,7 +59,7 @@ Class DbQuery {
 		if (!$statement->execute()) {
 			return false;
 		}
-		return $statement->fetchAll();
+		return $statement->fetchAll(PDO::FETCH_ASSOC);
 	}
 }
 
