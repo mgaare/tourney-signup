@@ -29,3 +29,23 @@ class AdminTemplate extends Template {
 		$this->setLayout('<?php echo $content; ?>');
 	}
 }
+
+class TemplateSnippet {
+	
+	protected $template;
+	
+	public function setTemplate($template) {
+		$this->template = $template;
+	}
+	
+	public function render($params) {
+		// Set all the params as variables in local function scope
+		foreach ($params as $key => $value) {
+			$$key = $value;
+		}
+		// now render and return it
+		ob_start();
+		require $this->template;
+		return ob_get_clean();
+	}
+}
