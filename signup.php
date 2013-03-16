@@ -58,6 +58,12 @@ function log_in_error($username, $password) {
 }
 
 function sign_up() {
+	$sign_up = ModelStore::getInstance('Signup');
+	$mode = ModelStore::getInstance('Mode');
+	$map = ModelStore::getInstance('Map');
+	$event = ModelStore::getInstance('Event');
+	
+	
 	
 }
 
