@@ -40,9 +40,21 @@ echo mapcat($snippet, $modes);
 
 $snippet = function(&$mode) {
 	$ret = "<p>Map for {$mode['name']} All v All match: "
-		 . "<select name=\"vote['{$mode['name']}']['all_v_all']\">"
+		 . "<select name=\"mode['{$mode['id']}']['all_v_all']\">"
 		 . "<option value='' selected>No Vote</option>";
-	return $ret .= mapcat($showMap, $mode['maps']);
+	$ret .= mapcat($showMap, 
+		filter(function($map) {
+			return ($map['all_v_all'] == 1);
+		}, $mode['maps']));
+	$ret .= "</select></p>";
+	$ret .= "<p>Map for {$mode['name']} Qualification matches: "
+		. "<select name=\"mode['{$mode['id']}']['qualification']\">"
+		. "<option value='' selected>No Vote</option>";
+	$ret .= mapcat($showMap,
+		filter(function($map) {
+			return ($map['qualification'] == 1);
+		}, $mode['maps']));
+	$ret .= "</select></p>";
 };
 
 $showMap = function(&$map) {
