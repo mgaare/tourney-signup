@@ -225,7 +225,7 @@ Class Signup extends Model {
 		$this->event = ModelStore::getInstance('Event');
 	}
 	
-	public function getCurrentForUser($user, $event) {
+	public function getForUser($user, $event) {
 		$qs = $this->select_base . ' where user_id = :user_id '
 			. 'AND event_id = :event_id';
 		$res = $this->query($qs, 
@@ -237,6 +237,8 @@ Class Signup extends Model {
 			return $res;
 		}
 	}
+	
+	public function deleteForUser($user, $event)
 	
 	public function save($signup) {
 		$user = array($this->user->id_col => $signup['user_id']);
