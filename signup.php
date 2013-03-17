@@ -120,7 +120,8 @@ function sign_up_process() {
 						 'qualification' => $vote->map->findById($qualification['map_id']),
 						 'all_v_all' => $vote->map->findById($all_v_all['map_id']));  
 		}}, $_POST['mode']);
-	$view_params = array('signups' => $signups, 'votes' => $votes);
+	$view_params = array('signups' => $signups, 'votes' => $votes,
+						 'user' => $current_user, 'event' => $current_event);
 	
 	$templateSnippet->setTemplateFile('signup_success.php');
 	$content = $templateSnippet->render($view_vars);
