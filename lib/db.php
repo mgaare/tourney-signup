@@ -238,7 +238,13 @@ Class Signup extends Model {
 		}
 	}
 	
-	public function deleteForUser($user, $event)
+	public function deleteForUser($user, $event) {
+		$qs = "delete from {$this->table} where user_id = :user_id "
+			. "AND event_id = :event_id";
+		return $this->query($qs, 
+			array('user_id' => $user[$this->user->id_col],
+				  'event_id' => $event[$this->event->id_col]));	
+	}
 	
 	public function save($signup) {
 		$user = array($this->user->id_col => $signup['user_id']);
