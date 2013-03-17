@@ -122,6 +122,10 @@ function sign_up_process() {
 		}}, $_POST['mode']);
 	$view_params = array('signups' => $signups, 'votes' => $votes);
 	
+	$templateSnippet->setTemplateFile('signup_success.php');
+	$content = $templateSnippet->render($view_vars);
+	echo $template->render($content);
+	
 }
 
 function sign_up_form($message = false) {
