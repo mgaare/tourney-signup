@@ -217,12 +217,14 @@ Class Signup extends Model {
 	
 	protected $table = 'signups';
 	protected $user;
-	protected $event; 
+	protected $event;
+	protected $mode;
 	
 	function __construct() {
 		parent::__construct();
 		$this->user = ModelStore::getInstance('User');
 		$this->event = ModelStore::getInstance('Event');
+		$this->mode = ModelStore::getIstance('Mode');
 	}
 	
 	public function getForUser($user, $event) {
@@ -358,5 +360,14 @@ class Vote extends Model {
 		$this->mode = ModelStore::getInstance('Mode');
 		$this->map = ModelStore::getInstance('Map');
 	}
+	
+	public function deleteForUser($user, $event) {
+		$qs = "delete from {$this->table} where user_id = :user_id "
+			. "AND event_id = :event_id";
+		return $this->query($qs, 
+			array('user_id' => $user[$this->user->id_col],
+				  'event_id' => $event[$this->event->id_col]));	
+	}
+	
 }
 	
