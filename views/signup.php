@@ -17,12 +17,13 @@ if (empty($event)) {
 <h2>Which modes are you playing in?</h2>
 
 <?php 
-$snippet = function(&$val) {
+$snippet = function(&$val) use($signup) {
 	$ret = "<p><label for='{$val['name']}-checkbox'>{$val['name']}"
 		. "</label>"
 		. "<input type='checkbox' name=\"mode[{$val['id']}]['signup']\""  
 		. " id='" . $val['name'] . "-checkbox'";
-	if (isset($val['signup']) && $val['signup']) {
+	$mode_signup = first(array_filter_search($signup, 'mode_id', $val['id']));
+	if (isset($mode_signup['signup']) && $mode_signup['signup']) {
 		$ret .= " checked";
 	}
 	$ret .= ">";
