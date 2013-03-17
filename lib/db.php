@@ -194,6 +194,10 @@ Class User extends Model {
 		return (isset($_SESSION['player_logged_in']) 
 			&& $_SESSION['player_logged_in']);
 	}
+	
+	public function getLoggedIn() {
+		return $_SESSION['player'];	
+	}
 }
 
 
