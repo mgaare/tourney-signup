@@ -47,7 +47,7 @@ function mapcat(&$function, &$list) {
 function array_filter_search(&$array, &$key, &$val) {
 	// wonderful functional code possible here
 	return filter(function($element) use ($key, $val) {
-		return (isset($lement[$key]) && ($element[$key] == $val));
+		return (isset($element[$key]) && ($element[$key] == $val));
 	}, $array);
 }
 

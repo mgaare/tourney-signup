@@ -256,6 +256,14 @@ Class Signup extends Model {
 			$this->update($signup); 
 		} else { $this->create($signup); }
 	}
+	
+	public function getForEventAndMode($event, $mode) {
+		$qs = "{$this->select_base}  where event_id = :event_id "
+			. "and mode_id = :mode_id";
+		return $this->query($qs,
+			array('event_id' => $event[$this->event->id_col],
+				  'mode_id' => $event[$this->mode->id_col]));
+	}
 }
 
 class Mode extends Model {
@@ -367,6 +375,15 @@ class Vote extends Model {
 		return $this->query($qs, 
 			array('user_id' => $user[$this->user->id_col],
 				  'event_id' => $event[$this->event->id_col]));	
+	}
+	
+	public function getCountsForEventMode($event, $mode) {
+		$qs = "select map_id, count(qualifier), count(all_v_all) "
+			. "from {$this->table} where event_id = :event_id "
+			. "and mode_id = :mode_id";
+		return $this->query($qs,
+			array('event_id' => $event[$this->event->id_col],
+				  'mode_id' => $mode[$this->mode->id_col])); 
 	}
 	
 }
