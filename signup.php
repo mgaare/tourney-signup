@@ -60,7 +60,68 @@ function log_in_error($username, $password) {
 }
 
 function sign_up() {
-		
+	if (empty($_POST)) {
+		sign_up_form();
+	} else {
+		sign_up_process();
+	}	
+}
+
+function sign_up_process() {
+	$signup = new Signup();
+	$templateSnippet = new TemplateSnippet();
+	$template = new UserTemplate();
+	$vote = new Vote();
+
+	$current_event = $signup->event->getCurrent();
+	$current_user = $signup->user->getLoggedIn();
+	
+	// first we handle the signups - deleting the old ones to handle the user
+	// unchecking columns
+	$signup->deleteForUser($current_user, $current_event);
+	$signups = map(function($postval) use ($current_event, $current_user, $signup) {
+		if (isset($postval['signup']) && ($postval['signup'])) {
+			$params = array('user_id' => $current_user['id'],
+						'event_id' => $current_event['id'],
+						'mode_id' => $postval['mode_id']);
+			if (isset($signup['team'])) {
+				$params['team'] = $postval['team'];
+			}
+			if (!$signup->save($params)) {
+				error_log('Failed to save signup with params: ' 
+					. print_r($params, true));
+				return false;
+			}
+			return $signup->mode->findById($postval['mode_id']);
+		}}, $_POST['mode']);
+	
+	// Now the votes
+	$votes = map(function($postval) use ($current_event, $current_user, $vote) {
+		// we only accept votes for the modes they signed up for
+		if (isset($postval['signup']) && ($postval['signup'])) {
+			$params = array('user_id' => $current_user['id'],
+						'event_id' => $current_event['id'],
+						'mode_id' => $postval['mode_id']);
+			$qualification = array('map_id' => $postval['qualification'],
+										  'qualification' => 1);
+			$all_v_all = array('map_id' => $postval['all_v_all'],
+									  'all_v_all' => 1);
+			if (!$vote->create(array_merge($params, $qualification))) {
+				error_log('Failed to save vote with params: ' 
+					. print_r($params, true));
+				return false;
+			}
+			if (!$vote->create(array_merge($params, $all_v_all))) {
+				error_log('Failed to save vote with params: ' 
+					. print_r($params, true));
+				return false;
+			}
+			return array('mode_id' => $postval['mode_id'],
+						 'qualification' => $vote->map->findById($qualification['map_id']),
+						 'all_v_all' => $vote->map->findById($all_v_all['map_id']));  
+		}}, $_POST['mode']);
+	$view_params = array('signups' => $signups, 'votes' => $votes);
+	
 }
 
 function sign_up_form($message = false) {
