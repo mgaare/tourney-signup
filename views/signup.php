@@ -18,7 +18,9 @@ if (empty($event)) {
 
 <?php 
 $snippet = function(&$val) use($signup) {
-	$ret = "<p><label for='{$val['name']}-checkbox'>{$val['name']}"
+	$ret = "<p><input type='hidden' name=\"mode[{$val['id']}]['mode_id']\" "
+		. "value='{$val['id']}'>"
+		. "<label for='{$val['name']}-checkbox'>{$val['name']}"
 		. "</label>"
 		. "<input type='checkbox' name=\"mode[{$val['id']}]['signup']\""  
 		. " id='" . $val['name'] . "-checkbox'";
