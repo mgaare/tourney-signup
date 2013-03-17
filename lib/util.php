@@ -44,11 +44,22 @@ function mapcat(&$function, &$list) {
 
 // Since model results are returned as arrays, we want to be able to get
 // results whose cols (key) is what we are looking for (val)
-function array_filter_search($array, $key, $val) {
+function array_filter_search(&$array, &$key, &$val) {
 	// wonderful functional code possible here
-	return array_filter($array, function($element) use ($key, $val) {
+	return filter(function($element) use ($key, $val) {
 		return (isset($lement[$key]) && ($element[$key] == $val));
-	});
+	}, $array);
+}
+
+// another great clojure function
+// key_seq is the magic bit - array('this', 'guy', 'what') key_seq refers to
+// $array['this']['guy']['what']
+// although to avoid the agony of too much copying, this is sadly done mutably
+function assoc_in(&$array, $key_seq, $val) {
+	$keystr = mapcat(function($key) {
+			return "[{$key}]";
+		}, $key_seq);
+	$array{$keystr} = $val;
 }
 
 function array_first($array) {
