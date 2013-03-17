@@ -43,6 +43,17 @@ class TemplateSnippet {
 		$this->template = $template;
 	}
 	
+	public function setTemplateFile($file) {
+		$filename = "../views/{$file}";
+		if (!file_exists($filename)) {
+			error_log("Tried to include template file {$filename} but it doesn't exist");
+			return false;
+		}		
+		$this->template = file_get_contents('../views/' . $file);
+		
+			
+	}
+	
 	public function render($params) {
 		// Set all the params as variables in local function scope
 		foreach ($params as $key => $value) {
