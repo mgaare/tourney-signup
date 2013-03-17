@@ -1,6 +1,7 @@
 <?php
 include_protection(__FILE__);
 ?>
+<p>Welcome <?php echo $user['nick']; ?></p>
 <h1>Sign up for the next SWL Tournament</h1>
 
 <?php
