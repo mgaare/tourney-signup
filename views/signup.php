@@ -18,16 +18,19 @@ if (empty($event)) {
 <h2>Which modes are you playing in?</h2>
 
 <?php 
-$snippet = function(&$val) use($signup) {
+$snippet = function($val) use($signup) {
 	$ret = "<p><input type='hidden' name=\"mode[{$val['id']}]['mode_id']\" "
 		. "value='{$val['id']}'>"
 		. "<label for='{$val['name']}-checkbox'>{$val['name']}"
 		. "</label>"
 		. "<input type='checkbox' name=\"mode[{$val['id']}]['signup']\""  
 		. " id='" . $val['name'] . "-checkbox'";
-	$mode_signup = first(array_filter_search($signup, 'mode_id', $val['id']));
-	if (isset($mode_signup['signup']) && $mode_signup['signup']) {
-		$ret .= " checked";
+	// check if they previously signed up
+	if ($signup) {
+		$mode_prev_signup = first(array_filter_search($signup, 'mode_id', $val['id']));
+		if (isset($mode_prev_signup['signup']) && $mode_prev_signup['signup']) {
+			$ret .= " checked";
+		}
 	}
 	$ret .= ">";
 	if ($val['team_mode'] == 1) {
