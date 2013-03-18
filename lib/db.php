@@ -366,7 +366,7 @@ class Vote extends Model {
 	private $map;
 	
 	function __construct() {
-		parent::construct();
+		parent::__construct();
 		$this->event = ModelStore::getInstance('Event');
 		$this->mode = ModelStore::getInstance('Mode');
 		$this->map = ModelStore::getInstance('Map');
