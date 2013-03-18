@@ -176,7 +176,7 @@ Class User extends Model {
 		if (count($result) == 0) {
 			return false;
 		}
-		else { return $result; }
+		else { return first($result); }
 	}
 	
 	public function exists($username) {
@@ -208,7 +208,8 @@ Class Event extends Model {
 	public function getCurrent() {
 		$qs = $this->select_base . ' where time > ' . time() 
 			. ' order by time ASC limit 1';
-		return $this->query($qs);
+		$res = $this->query($qs);
+		return first($res);
 	}
 }
 
