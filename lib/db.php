@@ -65,19 +65,13 @@ Class DbQuery {
 
 Class Model extends DbQuery {
 
-	protected $table = null;
+	protected $table;
 	protected $select_base = '';
 	protected $insert_base = '';
 	protected $update_base = '';
 	protected $id_col = 'id';
 	
-	function __construct() {
-		// I'm not sure if this is going to work... if we get some strange
-		// model initialization problems, this is a possible culprit
-		// not sure if it even helps
-		if (ModelStore::isInstance(get_class($this))) {
-			return ModelStore::getInstance(get_class($this));
-		} 
+	public function __construct() {
 		if ($this->table) {
 			$this->select_base = 'select * from ' . $this->table;
 			$this->insert_base = 'insert into ' . $this->table;
@@ -159,7 +153,7 @@ Class ModelStore {
 		if (ModelStore::isInstance($model_class)) {
 			return self::$models[$model_class];
 		} else {
-			self::$models[$model_class] = true;
+			//self::$models[$model_class] = true;
 			return self::$models[$model_class] = new $model_class();
 		}		
 	}	
