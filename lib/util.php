@@ -46,7 +46,7 @@ function mapcat($function, &$list) {
 
 // Since model results are returned as arrays, we want to be able to get
 // results whose cols (key) is what we are looking for (val)
-function array_filter_search(&$array, &$key, &$val) {
+function array_filter_search(&$array, $key, $val) {
 	// wonderful functional code possible here
 	return filter(function($element) use ($key, $val) {
 		return (isset($element[$key]) && ($element[$key] == $val));
