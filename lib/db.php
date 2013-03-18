@@ -39,7 +39,7 @@ Class DbQuery {
 	}
 	
 	protected function _prepareQuery($dbh, $query_string, $params) {
-		$statement = $dbcon->prepare($query_string);
+		$statement = $dbh->prepare($query_string);
 		if ($params) {
 			if (!$this->_bindParams($statement, $params)) {
 				error_log('call to DbQuery::_bindParams failed with args ' . print_r($params, true));
@@ -224,7 +224,7 @@ Class Signup extends Model {
 		parent::__construct();
 		$this->user = ModelStore::getInstance('User');
 		$this->event = ModelStore::getInstance('Event');
-		$this->mode = ModelStore::getIstance('Mode');
+		$this->mode = ModelStore::getInstance('Mode');
 	}
 	
 	public function getForUser($user, $event) {
