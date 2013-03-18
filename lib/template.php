@@ -1,7 +1,7 @@
 <?php
 
 class Template {
-	
+	// needs to be a function
 	protected $layout;
 		
 	public function setLayout($layout) {
@@ -15,7 +15,8 @@ class Template {
 		// to let us put our template files inside the webroot			
 		$include_protection = true;
 		ob_start();
-		require $this->layout;
+		$layoutfn = $this->layout;
+		echo $layoutfn($content);
 		return ob_get_clean();
 	}
 }
@@ -23,7 +24,7 @@ class Template {
 class UserTemplate extends Template {
 	
 	function __construct() {
-		$this->setLayout('<?php echo $content; ?>');
+		$this->setLayout(function ($content) { return "{$content}";});
 	}
 	
 }
@@ -31,7 +32,7 @@ class UserTemplate extends Template {
 class AdminTemplate extends Template {
 	
 	function __construct() {
-		$this->setLayout('<?php echo $content; ?>');
+		$this->setLayout(function ($content) { return "{$content}"; });
 	}
 }
 
