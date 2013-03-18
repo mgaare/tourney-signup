@@ -272,7 +272,8 @@ class Mode extends Model {
 	
 	protected $table = 'modes';
 	public $event;
-	private $select_event_modes = 'select modes.id as id, modes.name as name 
+	private $select_event_modes = 'select modes.id as id, modes.name as name,
+		modes.team_mode as team_mode
 		from modes inner join event_modes on event_modes.mode_id = modes.id 
 		where event_modes.event_id = :id';
 
