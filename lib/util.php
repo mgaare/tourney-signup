@@ -64,7 +64,7 @@ function assoc_in(&$array, $key_seq, $val) {
 	$array{$keystr} = $val;
 }
 
-function array_first($array) {
+function first($array) {
 	return array_pop(array_reverse($array));
 }
 
