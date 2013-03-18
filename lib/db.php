@@ -8,10 +8,10 @@ Class DbConnection
 	private static $password = '';
 	
 	public static function instance() {
-		if ($this->instance) {
-			return $this->instance;
+		if (self::$instance) {
+			return self::$instance;
 		}
-		return $this->instance = new PDO($this->dsn, $this->username, $this->password);
+		return self::$instance = new PDO($this->dsn, $this->username, $this->password);
 	}
 	
 }
@@ -148,19 +148,19 @@ Class ModelStore {
 	private static $models = array();
 	
 	public static function addInstance($model) {
-		$this->models[get_class($model)] = $model;
+		self::$models[get_class($model)] = $model;
 	}
 	
 	public static function isInstance($model_class) {
-		return (isset($this->models[$model_class]));
+		return (isset(self::$models[$model_class]));
 	}
 	
 	public static function getInstance($model_class) {
 		if (ModelStore::isInstance($model_class)) {
-			return $this->models[$model_class];
+			return self::$models[$model_class];
 		} else {
-			$this->models[$model_class] = true;
-			return $this->models[$model_class] = new $model_class();
+			self::$models[$model_class] = true;
+			return self::$models[$model_class] = new $model_class();
 		}		
 	}	
 }
