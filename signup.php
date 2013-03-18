@@ -26,7 +26,7 @@ function check_login($username, $password) {
 function log_in_form($message = '') {
 	$content = <<<EOT
 <h1>Please Log In with your SWL Account</h1>
-<form type="post">
+<form method="post">
 <p>
 	<label for="username">Login Name: </label>
 	<input type="text" name="username" id="username">
