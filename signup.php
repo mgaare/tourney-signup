@@ -144,8 +144,9 @@ function sign_up_form($message = false) {
 	// the corresponding maps to them - this is perhaps the only redeeming
 	// code in the entire function here
 	$modes = map(function($mode_val) use($map) {
-					return $mode_val['maps'] = $map->getForMode($mode_val);
-				 }, $arr = $mode->getForEvent($current_event));
+					$mode_val['maps'] = $map->getForMode($mode_val);
+					return $mode_val;
+				 }, $mode->getForEvent($current_event));
 	$current_user = $user->getLoggedIn();
 	$current_signup = $signup->getForUser($current_user, 
 												 $current_event);
