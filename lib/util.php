@@ -6,7 +6,7 @@
 // I reversed the arguments on the helpers to match the clojure way
 // Also, thanks for the hint to use references to help performance!
 
-function compose(&$f, &$g) {
+function compose($f, $g) {
   // Return the composed function
   return function() use($f,$g) {
     // Get the arguments passed into the new function
@@ -18,17 +18,17 @@ function compose(&$f, &$g) {
 }
 
 // Convenience wrapper for mapping
-function map(&$f, &$data) {
+function map($f, &$data) {
   return array_map($f, $data);
 }
 
 // Convenience wrapper for filtering arrays
-function filter(&$f, &$data) {
+function filter($f, &$data) {
   return array_filter($data, $f);
 }
 
 // Convenience wrapper for reducing arrays
-function fold(&$f, &$data, &$initial = null) {
+function fold($f, &$data, &$initial = null) {
   return array_reduce($data, $f, $initial);
 }
 
@@ -36,10 +36,12 @@ function fold(&$f, &$data, &$initial = null) {
 
 // This is a handy one from clojure
 // Does a map and then concatenates all the results
-function mapcat(&$function, &$list) {
+function mapcat($function, &$list) {
+	$res = map($function, $list);
+	$init = '';
 	return fold(function($col, $val) {
-		return $col . $val; },
-		map($function, $list), '');
+		return $col . $val;
+	}, $res, $init); 
 }
 
 // Since model results are returned as arrays, we want to be able to get
