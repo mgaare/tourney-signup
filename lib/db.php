@@ -11,7 +11,7 @@ Class DbConnection
 		if (self::$instance) {
 			return self::$instance;
 		}
-		return self::$instance = new PDO($this->dsn, $this->username, $this->password);
+		return self::$instance = new PDO(self::$dsn, self::$username, self::$password);
 	}
 	
 }
