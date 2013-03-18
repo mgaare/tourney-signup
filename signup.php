@@ -147,7 +147,7 @@ function sign_up_form($message = false) {
 					return $mode_val['maps'] = $map->getForMode($mode_val);
 				 }, $mode->getForEvent($current_event));
 	$current_user = $user->getLoggedIn();
-	$current_signup = $signup->getCurrentForUser($current_user, 
+	$current_signup = $signup->getForUser($current_user, 
 												 $current_event);
 	$view_vars = array('event' => $current_event, 'modes' => $modes, 
 					   'user' => $current_user, 'signup' => $current_signup);
