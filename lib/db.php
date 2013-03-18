@@ -38,6 +38,13 @@ Class DbQuery {
 		return $this->executeQuery($statement);
 	}
 	
+	public function debugQuery($query_string, $params = false) {
+		$dbcon = $this->getInstance();
+		$statement = $this->_prepareQuery($dbcon, $query_string, $params);
+		$statement->debugDumpParams();
+		return $statement;
+	}
+	
 	protected function _prepareQuery($dbh, $query_string, $params) {
 		$statement = $dbh->prepare($query_string);
 		if ($params) {
@@ -267,8 +274,7 @@ class Mode extends Model {
 	public $event;
 	private $select_event_modes = 'select * from modes 
 		inner join event_modes on event_modes.mode_id = modes.id 
-		inner join events on events.id = event_modes.event_id 
-		where events.id = ?';
+		where event_modes.event_id = :id';
 
 	function __construct() {
 		parent::__construct();
@@ -277,7 +283,8 @@ class Mode extends Model {
 
 	public function getForEvent($event) {
 		$res = $this->query($this->select_event_modes, 
-							array($this->id_col => $event['id']));
+							array('id' => $event[$this->event->id_col]));
+		return $res;
 	}
 	
 	public function saveAllForEvent($event, $modes) {
