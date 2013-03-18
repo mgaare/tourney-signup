@@ -45,14 +45,12 @@ class TemplateSnippet {
 	}
 	
 	public function setTemplateFile($file) {
-		$filename = "../views/{$file}";
+		$filename = dirname(__FILE__) . "/../views/{$file}";
 		if (!file_exists($filename)) {
 			error_log("Tried to include template file {$filename} but it doesn't exist");
 			return false;
 		}		
-		$this->template = file_get_contents('../views/' . $file);
-		
-			
+		$this->template = $filename;
 	}
 	
 	public function render($params) {
