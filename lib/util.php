@@ -18,17 +18,17 @@ function compose($f, $g) {
 }
 
 // Convenience wrapper for mapping
-function map($f, &$data) {
+function map($f, $data) {
   return array_map($f, $data);
 }
 
 // Convenience wrapper for filtering arrays
-function filter($f, &$data) {
+function filter($f, $data) {
   return array_filter($data, $f);
 }
 
 // Convenience wrapper for reducing arrays
-function fold($f, &$data, &$initial = null) {
+function fold($f, $data, $initial = null) {
   return array_reduce($data, $f, $initial);
 }
 
@@ -36,7 +36,7 @@ function fold($f, &$data, &$initial = null) {
 
 // This is a handy one from clojure
 // Does a map and then concatenates all the results
-function mapcat($function, &$list) {
+function mapcat($function, $list) {
 	$res = map($function, $list);
 	$init = '';
 	return fold(function($col, $val) {
@@ -46,7 +46,7 @@ function mapcat($function, &$list) {
 
 // Since model results are returned as arrays, we want to be able to get
 // results whose cols (key) is what we are looking for (val)
-function array_filter_search(&$array, $key, $val) {
+function array_filter_search($array, $key, $val) {
 	// wonderful functional code possible here
 	return filter(function($element) use ($key, $val) {
 		return (isset($element[$key]) && ($element[$key] == $val));
@@ -57,7 +57,7 @@ function array_filter_search(&$array, $key, $val) {
 // key_seq is the magic bit - array('this', 'guy', 'what') key_seq refers to
 // $array['this']['guy']['what']
 // although to avoid the agony of too much copying, this is sadly done mutably
-function assoc_in(&$array, $key_seq, $val) {
+function assoc_in($array, $key_seq, $val) {
 	$keystr = mapcat(function($key) {
 			return "[{$key}]";
 		}, $key_seq);
