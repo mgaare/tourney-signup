@@ -93,12 +93,29 @@ Class Model extends DbQuery {
 	
 	public function findById($id) {
 		$qs = $this->select_base . ' where ' . $this->id_col . ' = :' . $this->id_col;
-		return $this->query($qs, array($this->id_col => $id));
+		return first($this->query($qs, array($this->id_col => $id)));
+	}
+	
+	/**
+	 * does a select * from table, and then adds where conditions from params,
+	 * which needs to have array keys that match column names
+	 */ 
+	//which needs
+	public function findSimple($params = false) {
+		$qs = $this->select_base;
+		if ($params) {
+			$wheres = implode(' and', 
+				map(function($col) {
+						return "{$col} = :{$col}";
+					}, array_keys($params)));
+			$qs .= " where {$wheres}";
+		}
+		return $this->query($qs, $params);
 	}
 	
 	public function update($record) {
 		$qs = $this->_buildUpdateQuery($record);
-		return $this->debugQuery($qs, $record);
+		return $this->query($qs, $record);
 	}
 	
 	protected function _buildUpdateQuery($record, $qs_base = false) {
@@ -122,14 +139,14 @@ Class Model extends DbQuery {
 	
 	public function create($record) {
 		$qs = $this->_buildCreateQuery($record);
-		return $this->debugQuery($qs, $record);
+		return $this->query($qs, $record);
 	}
 	
 	protected function _buildCreateQuery($record, $qs_base = false) {
 		if ($qs_base) {
 			$qs = $qs_base;
 		} else {
-			$qs = $this->create_base;
+			$qs = $this->insert_base;
 		}
 		// more functional style... it's addictive really
 		$fields = ' (' . implode(', ', array_keys($record)) . ') ';
@@ -248,30 +265,6 @@ Class Signup extends Model {
 		return $this->query($qs, 
 			array('user_id' => $user[$this->user->id_col],
 				  'event_id' => $event[$this->event->id_col]));	
-	}
-	
-	public function save($signup) {
-		$user = array($this->user->id_col => $signup['user_id']);
-		$event = array($this->user->id_col => $signup['event_id']);
-		$mode = array($this->mode->id_col => $signup['mode_id']);
-		if ($current = $this->getCurrentForUser($user, $event)) {
-			$signup[$this->id_col] = $current[$this->id_col];
-			$this->update($signup); 
-		} else { $this->create($signup); }
-	}
-	
-	public function isUserSignedUpForEventMode($user, $event, $mode) {
-		$res = $this->getForUserEventMode($user, $event, $mode);
-		return (count($res) > 0);
-	}
-	
-	public function getForUserEventMode($user, $event, $mode) {
-		$qs = "{$this->select_base} where user_id = :user_id " 
-			. "and event_id = :event_id and mode_id = :mode_id limit 1";
-		$params = array('mode_id' => $mode[$this->mode->id_col], 
-						'event_id' => $event[$this->event->id_col],
-						'user_id' => $user[$this->user->id_col]);
-		return $this->query($qs, $params);
 	}
 	
 	public function getForEventAndMode($event, $mode) {
