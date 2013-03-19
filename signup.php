@@ -76,55 +76,58 @@ function sign_up_process() {
 	$current_event = $signup->event->getCurrent();
 	$current_user = $signup->user->getLoggedIn();
 	
+	$filtered_inputs = array_filter_search($_POST['mode'], 'signup', 'on');
+	
 	// first we handle the signups - deleting the old ones to handle the user
 	// unchecking columns
+	// we only want the stuff that the user has actually signed up for
 	$signup->deleteForUser($current_user, $current_event);
 	$signups = map(function($postval) use ($current_event, $current_user, $signup) {
-		if (isset($postval['signup']) && ($postval['signup'])) {
-			$params = array('user_id' => $current_user['id'],
-						'event_id' => $current_event['id'],
-						'mode_id' => $postval['mode_id']);
-			if (isset($signup['team'])) {
-				$params['team'] = $postval['team'];
-			}
-			if (!$signup->save($params)) {
-				error_log('Failed to save signup with params: ' 
-					. print_r($params, true));
-				return false;
-			}
-			return $signup->mode->findById($postval['mode_id']);
-		}}, $_POST['mode']);
+		$params = array('user_id' => $current_user['id'],
+					'event_id' => $current_event['id'],
+					'mode_id' => $postval['mode_id']);
+		if (isset($postval['team'])) {
+			$params['team'] = $postval['team'];
+		}
+		if (!$signup->create($params)) {
+			/*error_log('Failed to save signup with params: ' 
+				. print_r($params, true));*/
+		}
+		return $signup->mode->findById($postval['mode_id']);
+		}, $filtered_inputs);
 	
-	// Now the votes
-	$votes = map(function($postval) use ($current_event, $current_user, $vote) {
-		// we only accept votes for the modes they signed up for
-		if (isset($postval['signup']) && ($postval['signup'])) {
-			$params = array('user_id' => $current_user['id'],
-						'event_id' => $current_event['id'],
-						'mode_id' => $postval['mode_id']);
-			$qualification = array('map_id' => $postval['qualification'],
-										  'qualification' => 1);
-			$all_v_all = array('map_id' => $postval['all_v_all'],
-									  'all_v_all' => 1);
-			if (!$vote->create(array_merge($params, $qualification))) {
-				error_log('Failed to save vote with params: ' 
-					. print_r($params, true));
-				return false;
-			}
-			if (!$vote->create(array_merge($params, $all_v_all))) {
-				error_log('Failed to save vote with params: ' 
-					. print_r($params, true));
-				return false;
-			}
-			return array('mode_id' => $postval['mode_id'],
-						 'qualification' => $vote->map->findById($qualification['map_id']),
-						 'all_v_all' => $vote->map->findById($all_v_all['map_id']));  
-		}}, $_POST['mode']);
-	$view_params = array('signups' => $signups, 'votes' => $votes,
-						 'user' => $current_user, 'event' => $current_event);
+	// Now the votes - deleting previous votes first
+	$vote->deleteForUserEvent($current_user, $current_event);
+	$saveVotes = function($votes, $user, $event, $vote) {
+		$params = array('user_id' => $user['id'],
+						'event_id' => $event['id']);
+		map(function($vote_input) use ($vote, $params){
+			$vote->create(array_merge($params,
+							array('qualification' => 1, 
+								  'mode_id' => $vote_input['mode_id'],
+								  'map_id' => $vote_input['qualification'])));
+			}, filter(function($val) { return !(empty($val['qualification'])); }, $votes));
+		map(function($vote_input) use ($vote, $params){
+			$vote->create(array_merge($params,
+							array('all_v_all' => 1, 
+								  'mode_id' => $vote_input['mode_id'],
+								  'map_id' => $vote_input['all_v_all'])));
+			}, filter(function($val) { return !(empty($val['all_v_all'])); }, $votes));
+	};
+
+	$saveVotes($filtered_inputs, $current_user, $current_event, $vote);
+	
+	$votes = map(function($postval) use ($vote) {
+		return array('mode_id' => $postval['mode_id'],
+					 'qualification' => $vote->map->findById($postval['qualification']),
+					 'all_v_all' => $vote->map->findById($postval['all_v_all']));
+		}, $filtered_inputs);
+	
+	$view_params = array('signups' => $signups, 'event' => $current_event,
+						 'user' => $current_user, 'votes' => $votes);
 	
 	$templateSnippet->setTemplateFile('signup_success.php');
-	$content = $templateSnippet->render($view_vars);
+	$content = $templateSnippet->render($view_params);
 	echo $template->render($content);
 	
 }
