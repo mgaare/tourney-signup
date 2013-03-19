@@ -98,7 +98,7 @@ Class Model extends DbQuery {
 	
 	public function update($record) {
 		$qs = $this->_buildUpdateQuery($record);
-		return $this->query($qs, $record);
+		return $this->debugQuery($qs, $record);
 	}
 	
 	protected function _buildUpdateQuery($record, $qs_base = false) {
@@ -122,7 +122,7 @@ Class Model extends DbQuery {
 	
 	public function create($record) {
 		$qs = $this->_buildCreateQuery($record);
-		return $this->query($qs, $record);
+		return $this->debugQuery($qs, $record);
 	}
 	
 	protected function _buildCreateQuery($record, $qs_base = false) {
@@ -218,9 +218,9 @@ Class Event extends Model {
 Class Signup extends Model {
 	
 	protected $table = 'signups';
-	protected $user;
-	protected $event;
-	protected $mode;
+	public $user;
+	public $event;
+	public $mode;
 	
 	function __construct() {
 		parent::__construct();
@@ -253,10 +253,25 @@ Class Signup extends Model {
 	public function save($signup) {
 		$user = array($this->user->id_col => $signup['user_id']);
 		$event = array($this->user->id_col => $signup['event_id']);
+		$mode = array($this->mode->id_col => $signup['mode_id']);
 		if ($current = $this->getCurrentForUser($user, $event)) {
 			$signup[$this->id_col] = $current[$this->id_col];
 			$this->update($signup); 
 		} else { $this->create($signup); }
+	}
+	
+	public function isUserSignedUpForEventMode($user, $event, $mode) {
+		$res = $this->getForUserEventMode($user, $event, $mode);
+		return (count($res) > 0);
+	}
+	
+	public function getForUserEventMode($user, $event, $mode) {
+		$qs = "{$this->select_base} where user_id = :user_id " 
+			. "and event_id = :event_id and mode_id = :mode_id limit 1";
+		$params = array('mode_id' => $mode[$this->mode->id_col], 
+						'event_id' => $event[$this->event->id_col],
+						'user_id' => $user[$this->user->id_col]);
+		return $this->query($qs, $params);
 	}
 	
 	public function getForEventAndMode($event, $mode) {
@@ -329,9 +344,12 @@ class Map extends Model {
 	}
 	
 	public function getForMode($mode) {
-		$qs = $this->select_base . ' inner join mode_maps on mode_maps.map_id = maps.' 
-			. $this->id_col . ' where mode_maps.mode_id = :mode_id';
-		$params = array('mode_id' => $mode[$this->mode->id_col]);
+		$qs = "select maps.id as id, maps.name as name, "
+			. "mode_maps.qualification as qualification, "
+			. "mode_maps.all_v_all as all_v_all from maps "
+			. "inner join mode_maps on mode_maps.map_id = maps.id " 
+			. "where mode_maps.mode_id = :mode_id";
+		$params = array('mode_id' => $mode['id']);
 		return $this->query($qs, $params);
 	}
 	
@@ -361,18 +379,20 @@ class Map extends Model {
 class Vote extends Model {
 	
 	protected $table = 'votes';
-	private $event;
-	private $mode;
-	private $map;
+	public $event;
+	public $mode;
+	public $map;
+	public $user;
 	
 	function __construct() {
 		parent::__construct();
 		$this->event = ModelStore::getInstance('Event');
 		$this->mode = ModelStore::getInstance('Mode');
 		$this->map = ModelStore::getInstance('Map');
+		$this->user = ModelStore::getInstance('User');
 	}
 	
-	public function deleteForUser($user, $event) {
+	public function deleteForUserEvent($user, $event) {
 		$qs = "delete from {$this->table} where user_id = :user_id "
 			. "AND event_id = :event_id";
 		return $this->query($qs, 
