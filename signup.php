@@ -143,9 +143,9 @@ function sign_up_form($message = false) {
 	// gets the modes that are being played in this event, and then attaches
 	// the corresponding maps to them - this is perhaps the only redeeming
 	// code in the entire function here
-	$modes = map(function($mode_val) use($map) {
-					$mode_val['maps'] = $map->getForMode($mode_val);
-					return $mode_val;
+	$modes = map(function($mode) use($map) {
+					$mode['maps'] = $map->getForMode($mode);
+					return $mode;
 				 }, $mode->getForEvent($current_event));
 	$current_user = $user->getLoggedIn();
 	$current_signup = $signup->getForUser($current_user, 
