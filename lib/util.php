@@ -65,7 +65,8 @@ function assoc_in($array, $key_seq, $val) {
 }
 
 function first($array) {
-	return array_pop(array_reverse($array));
+	$rev = array_reverse($array);
+	return array_pop($rev);
 }
 
 function include_protection($file) {
