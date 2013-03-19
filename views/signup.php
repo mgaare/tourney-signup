@@ -53,26 +53,21 @@ echo mapcat($snippet, $modes);
 <?php
 
 $showMap = function($map) {
-	return "<option value='{$map['id']}>{$map['name']}</option>";
+	return "<option value='{$map['id']}'>{$map['name']}</option>";
 };
 
 $snippet = function(&$mode) use($showMap) {
 	$ret = "<p>Map for {$mode['name']} All v All match: "
 		 . "<select name=\"mode['{$mode['id']}']['all_v_all']\">"
 		 . "<option value='' selected>No Vote</option>";
-	$ret .= mapcat($showMap,
-		filter(function($map) {
-			return ($map['all_v_all'] == 1);
-		}, $mode['maps']));
+	$ret .= mapcat($showMap, array_filter_search($mode['maps'], 'all_v_all', 1));
 	$ret .= "</select></p>";
 	$ret .= "<p>Map for {$mode['name']} Qualification matches: "
 		. "<select name=\"mode['{$mode['id']}']['qualification']\">"
 		. "<option value='' selected>No Vote</option>";
-	$ret .= mapcat($showMap,
-		filter(function($map) {
-			return ($map['qualification'] == 1);
-		}, $mode['maps']));
+	$ret .= mapcat($showMap, array_filter_search($mode['maps'], 'qualification', 1));
 	$ret .= "</select></p>";
+	return $ret;
 };
 
 echo mapcat($snippet, $modes);
