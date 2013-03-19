@@ -11,7 +11,7 @@ if (empty($event)) {
 } else {
 ?>
 
-<p>Taking place <?php echo date("F j, G:i", $event['time']); ?></p>
+<p>Taking place <?php echo date("F j, at G:i", $event['time']) . ' GMT'; ?></p>
 
 <form method="post">
 

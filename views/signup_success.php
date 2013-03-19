@@ -3,7 +3,7 @@ include_protection(__FILE__);
 ?>
 <p>Welcome <?php echo $user['nick']; ?></p>
 <h1>Thanks for signing up for SWL</h1>
-<p>The tournament will be on <?php echo date("F j, G:i", $event['time']); ?></p>
+<p>The tournament will be on <?php echo date("F j, at G:i", $event['time']) . ' GMT'; ?></p>
 <h2>You signed up for these modes:</h2>
 <ul>
 <?php
