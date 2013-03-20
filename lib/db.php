@@ -104,7 +104,7 @@ Class Model extends DbQuery {
 	public function findSimple($params = false) {
 		$qs = $this->select_base;
 		if ($params) {
-			$wheres = implode(' and', 
+			$wheres = implode(' and ', 
 				map(function($col) {
 						return "{$col} = :{$col}";
 					}, array_keys($params)));
@@ -394,7 +394,7 @@ class Vote extends Model {
 	}
 	
 	public function getCountsForEventMode($event, $mode) {
-		$qs = "select map_id, count(qualifier), count(all_v_all) "
+		$qs = "select map_id, count(qualification), count(all_v_all) "
 			. "from {$this->table} where event_id = :event_id "
 			. "and mode_id = :mode_id";
 		return $this->query($qs,

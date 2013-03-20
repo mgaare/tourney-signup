@@ -14,22 +14,28 @@ function event_info() {
 	
 	$mode_signups = map(function($mode) use($user, $signup, $current_event) {
 			$ret = array('mode_name' => $mode['name'], 'mode_id' => $mode['id']);
-			$signups = $signup->getAllForEventAndMode($current_event, $mode);
+			$signups = $signup->findSimple(array('mode_id' => $mode['id'], 
+												 'event_id' => $current_event['id']));
 			$ret['users'] = map(function($signup) use ($user) {
 					return $user->findById($signup['user_id']);
 				}, $signups);
 			return $ret;
 		}, $event_modes);
 	
-	$mode_votes = map(function($mode) use($current_event, $vote) {
-			$ret = array('mode_name' => $mode['name'], 'mode_id' => $mode['id']);
-			$votes = $vote->getCountsForEventMode($current_event, $mode);
+	$signups_and_votes = map(function($mode_signup) use($current_event, $vote) {
+			$votes = $vote->getCountsForEventMode($current_event, array('id' => $mode_signup['mode_id']));
+			$ret = $mode_signup;
 			$ret['maps'] = map(function($mapvote) use ($vote) {
-					return array_merge($mapvote, $vote->map->findById($mapvote['map_id']));
+					if ($mapvote['map_id']) {
+						$map = $vote->map->findById($mapvote['map_id']);
+					} else { $map = array('name' => 'No Vote'); }
+					return array_merge($mapvote, $map);
 				}, $votes);
-		}, $event_modes);
-	$view_vars = array('event' => $current_event, 'signups' => $mode_signups, 
-					   'votes' => $mode_votes, 'modes' => $event_modes);
+			return $ret;
+		}, $mode_signups);
+	$view_vars = array('event' => $current_event, 
+					   'signups_and_votes' => $signups_and_votes, 
+					   'modes' => $event_modes);
 	$templateSnippet->setTemplateFile('../views/admin/index.php');
 	$content = $templateSnippet->render($view_vars);
 	echo $template->render($content);
@@ -52,10 +58,10 @@ function admin_check_login($password) {
 	}
 }
 
-function log_in_form($message = '') {
+function admin_log_in_form($message = '') {
 	$content = <<<EOT
 <h1>Admin Login</h1>
-<form type="post">
+<form method="post">
 <p>
 	<label for="password">Password: </label>
 	<input type="password" name="password" id="password">
@@ -74,5 +80,5 @@ EOT;
 if (Admin::isAdmin()) {
 	event_info();
 } else {
-	admin_login();
+	admin_log_in();
 }

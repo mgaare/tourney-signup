@@ -6,13 +6,7 @@ include_protection(__FILE__);
 <p>For tournament on <?php echo date("F j, G:i", $event['time']); ?></p>
 
 <?php
-$votes_and_signups = map(function($signup) use ($votes) {
-		// Since we have the votes and the signups separate (I'm sure I did this
-		// for a reason in the controller but cannot reacll it right now)
-		// it will be easier to work with if we merge them
-		return array_merge($signup, array_filter_search($votes, 'mode_id', $signup['mode_id'])); 
-	}, $signups);
-	
+
 echo mapcat(function($mode) {
 		$ret = "<h2>Mode: {$mode['mode_name']}</h2>"
 			 . "<h3>Participants:</h3><ul>";
@@ -29,6 +23,7 @@ echo mapcat(function($mode) {
 				 . "<td>{$map['count(all_v_all)']}</td>"
 				 . "<td>{$map['count(qualification)']}</td></tr>";
 			}, $mode['maps']);
+		$ret .= "</table>";
 		return $ret; 
-	}, $votes_and_signups);
+	}, $signups_and_votes);
 ?>
