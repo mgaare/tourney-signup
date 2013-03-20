@@ -11,7 +11,12 @@ echo mapcat(function($mode) {
 		$ret = "<h2>Mode: {$mode['mode_name']}</h2>"
 			 . "<h3>Participants:</h3><ul>";
 		$ret .= mapcat(function($user) {
-				return "<li>{$user['nick']}</li>";
+				$ret = "<li>{$user['nick']}";
+				if (isset($user['team']) && !(empty($user['team']))) {
+					$ret .= " ({$user['team']})";
+				}
+				$ret .= "</li>";
+				return $ret;
 			}, $mode['users']);
 		$ret .= "</ul>";
 		$ret .= "<h3>Map Votes:</h3>"

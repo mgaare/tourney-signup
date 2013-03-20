@@ -17,7 +17,11 @@ function event_info() {
 			$signups = $signup->findSimple(array('mode_id' => $mode['id'], 
 												 'event_id' => $current_event['id']));
 			$ret['users'] = map(function($signup) use ($user) {
-					return $user->findById($signup['user_id']);
+					$ret = $user->findById($signup['user_id']);
+					if (isset($signup['team'])) {
+						$ret['team'] = $signup['team'];
+					}
+					return $ret;
 				}, $signups);
 			return $ret;
 		}, $event_modes);
