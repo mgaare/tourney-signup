@@ -24,7 +24,15 @@ class Template {
 class UserTemplate extends Template {
 	
 	function __construct() {
-		$this->setLayout(function ($content) { return "{$content}";});
+		$this->setLayout(function ($content) { return "
+		<html><head><style>
+		body { 	background-color: #111111; 
+				color: #ff9900;
+		}
+		</style></head>
+		<body>
+		{$content}
+		</body></html>";});
 	}
 	
 }
