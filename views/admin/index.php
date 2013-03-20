@@ -11,7 +11,7 @@ echo mapcat(function($mode) {
 		$ret = "<h2>Mode: {$mode['mode_name']}</h2>"
 			 . "<h3>Participants:</h3><ul>";
 		$ret .= mapcat(function($user) {
-				$ret = "<li>{$user['nick']}";
+				$ret = "<li>id {$user['id']} - {$user['nick']}";
 				if (isset($user['team']) && !(empty($user['team']))) {
 					$ret .= " ({$user['team']})";
 				}
