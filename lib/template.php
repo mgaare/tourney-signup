@@ -26,8 +26,18 @@ class UserTemplate extends Template {
 	function __construct() {
 		$this->setLayout(function ($content) { return "
 		<html><head><style>
-		body { 	background-color: #000000; 
-				color: #ff9900;
+		h1 { color: orange; }
+		h2 { color: orange; }
+		#fields {
+			width: 200px;
+			height: 25px;
+			border: 1px solid #CCC;
+			margin-left: 10px;
+			color: #999999;			
+		}
+		body {
+		 	background-color: #000000; 
+			color: #ffffff;
 		}
 		</style></head>
 		<body>
