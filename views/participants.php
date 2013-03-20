@@ -9,7 +9,7 @@ include_protection(__FILE__);
 
 echo mapcat(function($mode) {
 		$ret = "<h2>Mode: {$mode['mode_name']}</h2>"
-			 . "<h3>Participants:</h3><ul>";
+			 . "<ul>";
 		$ret .= mapcat(function($user) {
 				$ret = "<li>{$user['nick']}";
 				if (isset($user['team']) && !(empty($user['team']))) {
