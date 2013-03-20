@@ -75,6 +75,6 @@ echo mapcat($snippet, $modes);
  *  commented for now
  */
 ?>
-<input type="Submit" value="Sign Up">
+<p><input type="Submit" value="Sign Up"></p>
 </form>
 <?php } ?>
