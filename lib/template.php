@@ -26,7 +26,7 @@ class UserTemplate extends Template {
 	function __construct() {
 		$this->setLayout(function ($content) { return "
 		<html><head><style>
-		body { 	background-color: #111111; 
+		body { 	background-color: #000000; 
 				color: #ff9900;
 		}
 		</style></head>
@@ -40,7 +40,12 @@ class UserTemplate extends Template {
 class AdminTemplate extends Template {
 	
 	function __construct() {
-		$this->setLayout(function ($content) { return "{$content}"; });
+		$this->setLayout(function ($content) { return "
+		<html><head><title>SWL Signup Admin</title></head>
+		<body>
+		<div class='menu'><a href='index.php'>Admin Home</a> | <a href='maps.php'>Maps</a></div>
+		{$content}
+		</body></html>"; });
 	}
 }
 
