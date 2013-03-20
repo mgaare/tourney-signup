@@ -97,6 +97,7 @@ function sign_up_process() {
 		}, $filtered_inputs);
 	
 	// Now the votes - deleting previous votes first
+	/*
 	$vote->deleteForUserEvent($current_user, $current_event);
 	$saveVotes = function($votes, $user, $event, $vote) {
 		$params = array('user_id' => $user['id'],
@@ -121,7 +122,8 @@ function sign_up_process() {
 		return array('mode_id' => $postval['mode_id'],
 					 'qualification' => $vote->map->findById($postval['qualification']),
 					 'all_v_all' => $vote->map->findById($postval['all_v_all']));
-		}, $filtered_inputs);
+		}, $filtered_inputs); */
+	$votes = array();
 	
 	$view_params = array('signups' => $signups, 'event' => $current_event,
 						 'user' => $current_user, 'votes' => $votes);

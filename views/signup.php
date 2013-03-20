@@ -47,10 +47,11 @@ $snippet = function($val) use($signup) {
 
 echo mapcat($snippet, $modes);
 ?>
-
+<?php
+/*
 <h2>What Maps Do You Want?</h2>
 
-<?php
+
 
 $showMap = function($map) {
 	return "<option value='{$map['id']}'>{$map['name']}</option>";
@@ -71,6 +72,8 @@ $snippet = function(&$mode) use($showMap) {
 };
 
 echo mapcat($snippet, $modes);
+ *  commented for now
+ */
 ?>
 <input type="Submit" value="Sign Up">
 </form>
