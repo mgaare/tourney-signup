@@ -346,6 +346,12 @@ class Map extends Model {
 		return $this->query($qs, $params);
 	}
 	
+	public function getAllModes($map) {
+		$qs = "select * from map_modes where map_id = :map_id";
+		$params = array('map_id' => $map['id']);
+		return $this->query($qs, $params);
+	}
+	
 	public function saveForMode($map, $mode) {
 		$qs_base = 'insert into mode_maps ';
 		$params = array('mode_id' => $mode[$this->mode->id_col],
