@@ -347,7 +347,7 @@ class Map extends Model {
 	}
 	
 	public function getAllModes($map) {
-		$qs = "select * from map_modes where map_id = :map_id";
+		$qs = "select * from mode_maps where map_id = :map_id";
 		$params = array('map_id' => $map['id']);
 		return $this->query($qs, $params);
 	}
