@@ -2,12 +2,6 @@
 include_protection(__FILE__);
 ?>
 
-// debug
-<h2>Maps debug</h2>
-<pre><?php print_r($maps); ?></pre>
-<h2>Modes debug</h2>
-<pre><?php print_r($modes); ?></pre>
-
 <h1>Select Which Maps are Active for Each Mode</h1>
 <form method="post">
 
@@ -15,14 +9,14 @@ include_protection(__FILE__);
 
 function mapCheckbox($map, $mode, $type) {
 	$ret = "<input type='checkbox' id='{$mode['name']}-map{$map['id']}-{$type}'
-			name='map[{$map['id']}][{$type}]' ";
-	if (!empty($map['modes'])) {
+			name='mode[{$mode['id']}][maps][{$map['id']}][{$type}]'";
+	if (isset($map['modes']) && $map['modes']) {
 		$mode_check = first(array_filter_search($map['modes'], 'mode_id', $mode['id']));
 		if ($mode_check[$type] == 1) {
-			$ret .= 'checked';
+			$ret .= ' checked ';
 		}
 	}
-	$ret .= " >";
+	$ret .= ">";
 	return $ret;
 };
 
@@ -55,17 +49,16 @@ function displayModeMaps($mode) {
 
 // we need to set up some hidden form fields
 echo mapcat(function($mode) {
-	return "<input type='hidden' name='mode[{$mode['id']}][id]' 
-		value='{$mode['id']}>";	
+	return "<input type='hidden' name='mode[{$mode['id']}][id]' "
+			. "value='{$mode['id']}'>\n";
 }, $modes);
 
-/* debug
+// show the maps for each mode
 echo mapcat(function($mode) use ($maps) {
 	$displayFn = displayModeMaps($mode);
-	return mapcat($displayFn, $maps);
+	return $displayFn($maps);
 }, $modes);
- * 
- */
-?>
 
+?>
+<input type="submit" value="Submit">
 </form>
