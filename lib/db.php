@@ -224,7 +224,7 @@ Class Event extends Model {
 	protected $table = 'events';
 	
 	public function getCurrent() {
-		$qs = $this->select_base . ' where time > ' . time() 
+		$qs = $this->select_base . ' where time > ' . time() - (60*60*24)
 			. ' order by time ASC limit 1';
 		$res = $this->query($qs);
 		return first($res);
