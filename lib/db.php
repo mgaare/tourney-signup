@@ -355,7 +355,9 @@ class Map extends Model {
 	public function saveForMode($map, $mode) {
 		$qs_base = 'insert into mode_maps ';
 		$params = array('mode_id' => $mode[$this->mode->id_col],
-						'map_id' => $map[$this->id_col]);
+						'map_id' => $map[$this->id_col],
+						'qualification' => $map['qualification'],
+						'all_v_all' => $map['all_v_all']);
 		return $this->create($params);
 	}
 	
