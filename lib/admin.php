@@ -15,4 +15,9 @@ class Admin {
 	static function isAdmin() {
 		return (isset($_SESSION['admin']) && $_SESSION['admin']);
 	}
+	
+	static function notAdmin() {
+		die(header('Location: index.php')); // should redirect to login
+	}
+	
 }
