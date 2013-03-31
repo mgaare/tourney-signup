@@ -15,7 +15,7 @@ if (isset($current_event) && !empty($current_event)) {
 <h2>Events</h2>
 <table>
 	<tr>
-		<th>Event ID</th><th>Date / Time in GMT</th><th>Actions</th>
+		<th>Event ID</th><th>Date / Time in GMT</th><th>Modes</th><th>Actions</th>
 	</tr>
 	
 <?php
@@ -23,6 +23,10 @@ if (isset($current_event) && !empty($current_event)) {
 echo mapcat(function($event) {
 		$ret = "<tr><td>{$event['id']}</td><td>" 
 			. date("F j, G:i", $event['time'])
+			. "</td><td>"
+			. implode(', ', mapcat(function($mode) {
+					return $mode['name'];
+				}, $event['modes']))
 			. "</td><td>"
 			. "<a href='events.php?action=view&id={$event['id']}'>View</a> "
 			. "<a href='events.php?action=edit&id={$event['id']}'>Edit</a> "
