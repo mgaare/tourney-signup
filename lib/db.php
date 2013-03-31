@@ -101,7 +101,7 @@ Class Model extends DbQuery {
 	 * which needs to have array keys that match column names
 	 */ 
 	//which needs
-	public function findSimple($params = false) {
+	public function findSimple($params = false, $options = false) {
 		$qs = $this->select_base;
 		if ($params) {
 			$wheres = implode(' and ', 
@@ -109,6 +109,15 @@ Class Model extends DbQuery {
 						return "{$col} = :{$col}";
 					}, array_keys($params)));
 			$qs .= " where {$wheres}";
+		}
+		if ($options) {
+			if (isset($options['order']) && !empty($options['order'])) {
+				$by = $options['order']['by'];
+				if (isset($options['order']['dir']) && !empty($options['order']['dir'])) {
+					$dir = $options['order']['dir'];
+				} else { $dir = 'asc'; }
+				$qs .= " order by {$by} {$dir}";
+			}
 		}
 		return $this->query($qs, $params);
 	}
