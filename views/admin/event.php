@@ -24,7 +24,7 @@ echo mapcat(function($event) {
 		$ret = "<tr><td>{$event['id']}</td><td>" 
 			. date("F j, G:i", $event['time'])
 			. "</td><td>"
-			. implode(', ', mapcat(function($mode) {
+			. implode(', ', map(function($mode) {
 					return $mode['name'];
 				}, $event['modes']))
 			. "</td><td>"
@@ -38,42 +38,21 @@ echo mapcat(function($event) {
 </table>
 
 <h2>Create New Event</h2>
+<h3>(Time in GMT)</h3>
 
 <form method="post">
-	<label for="month">Month</label>
-	<select name="month" id="month">
-		<?php
-			$months = array('January',
-							'February',
-							'March',
-							'April',
-							'May',
-							'June',
-							'July',
-							'August',
-							'Septempber', 
-							'October',
-							'November',
-							'December');
-			echo mapcat(function($month) {
-					return "<option value={$month}>{$month}</option>";
-				}, $months);
-		?>
-	</select>
-	<label for="day">Day</label>
-	<select name="day" id="day">
-		<?php
-			echo mapcat(function($day) {
-				return "<option value={$day}>{$day}</option>";
-			}, range(1, 31));
-		?>
-	</select>
-	<label for="year">Year</label>
-	<select name="year" id="year">
-		<?php
-			echo mapcat(function($year) {
-				return "<option value={$year}>{$year}</option>";
-			}, range(date('Y') - 1, date('Y') +1));
-		?>
-	</select>
+<?php 
+echo View\monthSelect();
+echo View\daySelect();
+echo View\yearSelect();
+echo View\hourSelect();
+echo View\minuteSelect();
+
+echo mapcat(function($mode) {
+	return View\checkbox(array('name' => "modes[{$mode['id']}][{$mode['id']}]",
+							   'id' => "checkbox_mode_{$mode['id']}",
+							   'label' => $mode['name']));
+	}, $modes);
+?>
+<input type='Submit' value='Submit'>
 </form>

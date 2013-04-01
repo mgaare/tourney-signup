@@ -31,10 +31,6 @@ function event_index() {
 	$template = new AdminTemplate();
 	$templateSnippet = new TemplateSnippet();
 
-	$events = $event->findSimple(false, 
-								 array('order' => 
-								 	   array('by' => 'time', 
-								 	   		 'dir' => 'desc')));
 	$events = map(function($event) use ($mode) {
 			$event['modes'] = $mode->getForEvent($event);
 			return $event;
