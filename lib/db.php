@@ -17,17 +17,19 @@ Class DbConnection
 	}
 	
 	private static function createInstance() {
-		if (set_not_empty($_ENV, 'SWL_DB_NAME')
-			&& set_not_empty($_ENV, 'SWL_DB_HOST')) {
-				self::$db_name = $_ENV['SWL_DB_NAME'];
-				self::$host = $_ENV['SWL_DB_HOST'];	
+		if (set_not_empty($_SERVER, 'SWL_DB_NAME')
+			&& set_not_empty($_SERVER, 'SWL_DB_HOST')) {
+				self::$db_name = $_SERVER['SWL_DB_NAME'];
+				self::$host = $_SERVER['SWL_DB_HOST'];	
 		}
-		if (set_not_empty($_ENV['SWL_DB_USER']) 
-			&& set_not_empty($_ENV['SWL_DB_PASSWORD'])) {
-			self::$username = $_ENV['SWL_DB_USER'];
-			self::$password = $_ENV['SWL_DB_PASSWORD'];
+		if (set_not_empty($_SERVER, 'SWL_DB_USER') 
+			&& set_not_empty($_SERVER, 'SWL_DB_PASSWORD')) {
+			self::$username = $_SERVER['SWL_DB_USER'];
+			self::$password = $_SERVER['SWL_DB_PASSWORD'];
 		}
-		$dsn = "{self::$db_type}:dbname={self::$db_name};host={self::$host}";
+		
+		$dsn = self::$db_type . ':dbname=' . self::$db_name 
+				. ';host=' . self::$host;
 		return self::$instance = new PDO($dsn, self::$username, self::$password);
 	}
 	
@@ -254,7 +256,11 @@ Class Event extends Model {
 		$qs = $this->select_base . ' where time > ' . time() - (60*60*24)
 			. ' order by time ASC limit 1';
 		$res = $this->query($qs);
-		return first($res);
+		if (!$res) {
+			return false;
+		} else {
+			return first($res);
+		}
 	}
 }
 
