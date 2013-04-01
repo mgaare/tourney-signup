@@ -83,3 +83,12 @@ function map_print($array, $function) {
 		array_map($array, $function),
 		'print_r');
 }
+/**
+ * looks to see if $array has $key and the value isn't empty
+ * basically to replace this construct which is making me insane using it
+ * over and over:
+ * if (isset($array[$key]) && !empty($array[$key]))
+ */
+function set_not_empty($array, $key) {
+	return (isset($array[$key]) && !empty($array[$key]));
+}
