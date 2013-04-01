@@ -5,6 +5,9 @@ class Admin {
 	private static $admin_pass = '';
 	
 	static function login($pass) {
+		if (set_not_empty($_ENV, 'SWL_ADMIN_PASS')) {
+			self::$admin_pass = $_ENV['SWL_ADMIN_PASS'];
+		}
 		if ($pass != self::$admin_pass) {
 			return false;
 		} else {

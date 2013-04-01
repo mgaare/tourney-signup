@@ -3,7 +3,9 @@
 Class DbConnection
 {
 	private static $instance = null;
-	private static $dsn = '';
+	private static $db_type = 'mysql';
+	private static $host = '';
+	private static $db_name = '';
 	private static $username = '';
 	private static $password = '';
 	
@@ -11,7 +13,22 @@ Class DbConnection
 		if (self::$instance) {
 			return self::$instance;
 		}
-		return self::$instance = new PDO(self::$dsn, self::$username, self::$password);
+		return self::createInstance();
+	}
+	
+	private static function createInstance() {
+		if (set_not_empty($_ENV, 'SWL_DB_NAME')
+			&& set_not_empty($_ENV, 'SWL_DB_HOST')) {
+				self::$db_name = $_ENV['SWL_DB_NAME'];
+				self::$host = $_ENV['SWL_DB_HOST'];	
+		}
+		if (set_not_empty($_ENV['SWL_DB_USER']) 
+			&& set_not_empty($_ENV['SWL_DB_PASSWORD'])) {
+			self::$username = $_ENV['SWL_DB_USER'];
+			self::$password = $_ENV['SWL_DB_PASSWORD'];
+		}
+		$dsn = "{self::$db_type}:dbname={self::$db_name};host={self::$host}";
+		return self::$instance = new PDO($dsn, self::$username, self::$password);
 	}
 	
 }
@@ -49,7 +66,8 @@ Class DbQuery {
 		$statement = $dbh->prepare($query_string);
 		if ($params) {
 			if (!$this->_bindParams($statement, $params)) {
-				error_log('call to DbQuery::_bindParams failed with args ' . print_r($params, true));
+				error_log('call to DbQuery::_bindParams failed with args ' 
+						  . print_r($params, true));
 				return false;
 			}
 		}
