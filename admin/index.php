@@ -58,7 +58,7 @@ function admin_check_login($password) {
 	if (Admin::login($password)) {
 		event_info();
 	} else {
-		log_in_form('Nope, wrong password!');
+		admin_log_in_form('Nope, wrong password!');
 	}
 }
 
