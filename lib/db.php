@@ -57,6 +57,13 @@ Class DbQuery {
 		return $this->executeQuery($statement);
 	}
 	
+	protected function _rawquery($query_string, $params = false) {
+		$dbcon = $this->getInstance();
+		$statement = $this->_prepareQuery($dbcon, $query_string, $params);
+		$statement->execute();
+		return $statement;
+	}
+	
 	public function debugQuery($query_string, $params = false) {
 		$dbcon = $this->getInstance();
 		$statement = $this->_prepareQuery($dbcon, $query_string, $params);
@@ -168,7 +175,13 @@ Class Model extends DbQuery {
 	
 	public function create($record) {
 		$qs = $this->_buildCreateQuery($record);
-		return $this->query($qs, $record);
+		$res = $this->_rawquery($qs, $record);
+		if ($res->rowCount == 0) {
+			return false;
+		} else {
+			$dbh = $this->getInstance();
+			return $this->findById($dbh->lastInsertId());
+		}
 	}
 	
 	protected function _buildCreateQuery($record, $qs_base = false) {
