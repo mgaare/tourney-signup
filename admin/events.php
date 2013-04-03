@@ -62,19 +62,61 @@ function create_event() {
 		$time = strtotime("{$month} {$day}, {$year} {$hour}:{$minute}");
 		$event = new Event();
 		// save the event
-		if ($current_event = $event->create(array('time' => $time))) {
+		if (!$current_event = $event->create(array('time' => $time))) {
 			event_index('Failed to save the event');
 		} else {
 			// save the modes
 			if (set_not_empty($_POST, 'modes')) {
 				$mode = new Mode();
-				$modes = $_POST['modes'];
-				$mode->saveAllForEvent($event, $modes);
+				$modes = map(function($mode_id) {
+						return array('mode_id' => $mode_id);
+					}, $_POST['modes']);
+				$mode->saveAllForEvent($current_event, $modes);
 			}
 			// redirect to event view
 			view_event($current_event['id']);
 		}
 	}
+}
+
+function view_event($id = false) {
+	$event = new Event();
+	$mode = new Mode();
+	$signup = new Signup();
+	$template = new AdminTemplate();
+	$templateSnippet = new TemplateSnippet();
+
+	if ($id) {
+		$current_event = $event->findById($id);
+	} elseif (set_not_empty($_GET, 'id')) {
+		$current_event = $event->findById($_GET['id']);
+	} else {
+		$current_event = $event->getCurrent();
+	}
+
+	$event_modes = $mode->getForEvent($current_event);
+	$e_m_with_signups = map(function($mode) use ($signup, $current_event) {
+			// get the signups for the event and mode
+			$signups = $signup->findSimple(array(
+					'event_id' => $current_event['id'],
+					'mode_id' => $mode['id']),
+				array('order' => array(
+					'by' => 'team',
+					'dir' => 'asc')));
+			// append the user data to each signup
+			$signups_with_users = map(function($signup_data) use ($signup) {
+					$signup_data['User'] = $signup->user->findById($signup_data['user_id']);
+					return $signup_data;
+				}, $signups);
+			$mode['signups'] = $signups_with_users;
+			return $mode;
+		}, $event_modes);
+	$view_vars = array('event' => $current_event,
+					   'modes' => $event_modes,
+					   'signups' => $e_m_with_signups);
+	$templateSnippet->setTemplateFile('../views/admin/view_event.php');
+	$content = $templateSnippet->render($view_vars);
+	echo $template->render($content);
 }
 
 function event_index($message = false) {

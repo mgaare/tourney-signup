@@ -176,7 +176,7 @@ Class Model extends DbQuery {
 	public function create($record) {
 		$qs = $this->_buildCreateQuery($record);
 		$res = $this->_rawquery($qs, $record);
-		if ($res->rowCount == 0) {
+		if ($res->rowCount() == 0) {
 			return false;
 		} else {
 			$dbh = $this->getInstance();
