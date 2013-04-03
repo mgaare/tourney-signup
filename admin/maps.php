@@ -50,10 +50,6 @@ function maps_process() {
 	maps_form($message);
 }
 
-function maps_process() {
-	echo 'maps_process';
-}
-
 if (Admin::isAdmin()) {
 	maps();
 } else {
