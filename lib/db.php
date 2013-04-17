@@ -266,8 +266,9 @@ Class Event extends Model {
 	protected $table = 'events';
 	
 	public function getCurrent() {
-		$qs = $this->select_base . ' where time > ' . time() - (60*60*24)
-			. ' order by time ASC limit 1';
+		$time = time() - (60 * 60 * 24);
+		$qs = "{$this->select_base} where time > {$time} "
+			. 'order by time ASC limit 1';
 		$res = $this->query($qs);
 		if (!$res) {
 			return false;
