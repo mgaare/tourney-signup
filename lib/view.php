@@ -2,6 +2,12 @@
 
 namespace View;
 
+function localTimeZone($time, $locality = "Europe/Berlin") {
+	$dt = new DateTime($time);
+	$dt->setTimeZone(new DateTimeZone($locality));
+	return $dt->format('U') + $dt->getOffset();
+}
+
 function selectOption($value, $label) {
 	return "<option value='{$value}'>{$label}</option>";
 }
