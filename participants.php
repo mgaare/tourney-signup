@@ -5,6 +5,7 @@ require_once('./lib/base.php');
 function event_info() {
 	$signup = new Signup();
 	$user = new User();
+	$mode = new Mode();
 	$template = new UserTemplate();
 	$templateSnippet = new TemplateSnippet();
 	
@@ -12,7 +13,7 @@ function event_info() {
 	$event_modes = $signup->mode->getForEvent($current_event);
 	
 	$mode_signups = map(function($mode) use($user, $signup, $current_event) {
-			$ret = array('mode_name' => $mode['name'], 'mode_id' => $mode['id']);
+			$ret = $mode;
 			$signups = $signup->findSimple(array('mode_id' => $mode['id'], 
 												 'event_id' => $current_event['id']),
 											array('order' => array('by' => 'team')));

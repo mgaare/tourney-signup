@@ -3,8 +3,8 @@
 namespace View;
 
 function localTimeZone($time, $locality = "Europe/Berlin") {
-	$dt = new DateTime($time);
-	$dt->setTimeZone(new DateTimeZone($locality));
+	$dt = new \DateTime("@$time");
+	$dt->setTimeZone(new \DateTimeZone($locality));
 	return $dt->format('U') + $dt->getOffset();
 }
 

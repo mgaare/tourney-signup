@@ -73,12 +73,12 @@ function first($array) {
 function group_by($array, $by) {
 	// if $by is a function, we do it this way
 	if (is_object($by) && is_callable($by)) {
-		return fold(function(&$coll, $elem) {
+		return fold(function(&$coll, $elem) use ($by) {
 			$coll[$by($elem)] = $elem;	
 		}, $array, array());
 	} else {
 	// otherwise, we do it this way (assuming $by is a key)
-		return fold(function(&$coll, $elem) {
+		return fold(function(&$coll, $elem) use ($by) {
 			$coll[$by][] = $elem;
 		}, $array, array());
 	}
