@@ -71,9 +71,17 @@ function first($array) {
 
 // borrowed from Ruby
 function group_by($array, $by) {
-	return fold(function(&$coll, $elem) {
-		$coll[$by][] = $elem;
-	}, array());
+	// if $by is a function, we do it this way
+	if (is_object($by) && is_callable($by)) {
+		return fold(function(&$coll, $elem) {
+			$coll[$by($elem)] = $elem;	
+		}, $array, array());
+	} else {
+	// otherwise, we do it this way (assuming $by is a key)
+		return fold(function(&$coll, $elem) {
+			$coll[$by][] = $elem;
+		}, $array, array());
+	}
 }
 
 function include_protection($file) {
