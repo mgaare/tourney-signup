@@ -69,6 +69,13 @@ function first($array) {
 	return array_pop($rev);
 }
 
+// borrowed from Ruby
+function group_by($array, $by) {
+	return fold(function(&$coll, $elem) {
+		$coll[$by][] = $elem;
+	}, array());
+}
+
 function include_protection($file) {
 	global $include_protection;
 	
