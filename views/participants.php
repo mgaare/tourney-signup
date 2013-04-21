@@ -3,7 +3,11 @@ include_protection(__FILE__);
 ?>
 
 <h1>SWL Participants</h1>
-<p>For tournament on <?php echo date("F j, G:i", $event['time']); ?></p>
+<p>For tournament on <?php 
+echo date("F j, G:i", 
+		  View/localTimeZone($event['time'])); 
+		  
+?>, German Time</p>
 
 <?php
 

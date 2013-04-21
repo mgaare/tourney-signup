@@ -5,8 +5,8 @@ include_protection(__FILE__);
 <h1>SWL Event</h1>
 <?php
 
-echo "<p>Date and time of event: " . date("F j, G:i GMT", $event['time']) 
-	. "</p>";
+echo "<p>Date and time of event: " . date("F j, G:i", $event['time']) 
+	. " GMT</p>";
 ?>
 
 <h2>Modes and Signups</h2>
