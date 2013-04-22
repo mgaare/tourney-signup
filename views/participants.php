@@ -12,9 +12,9 @@ echo date("F j, G:i",
 <?php
 
 function individualModeDisplay($mode) {
-	$ret = "<ul>" 
+	$ret = "<ul>"
 		. mapcat(function($user) {
-			"<li>{$user['nick']}</li>";
+			return "<li>{$user['nick']}</li>";
 		}, $mode['users'])
 		. "</ul>";
 	return $ret;
